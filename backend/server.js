@@ -20,6 +20,9 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/posts', postRouter);
 app.use('/api/comments', commentRouter);
+app.all('*', (_req,res)=>{
+    return res.status(404).json({msg:'route does not exist'})
+})
 
 const server = app.listen(port, () => {
     console.log(`server is running on http://localhost:${port}`);
