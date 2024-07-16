@@ -106,8 +106,20 @@ router.patch('/accept', isAuthenticated,async (req, res) => {
     }
 })
 
-router.delete('/', async (req, res) => {
-    res.sendStatus(200)
+router.delete('/', isAuthenticated,async (req, res) => {
+    const {user_id} = req;
+    try {
+
+        await prisma.user.delete({where:{id:user_id} });
+        res.cookie('access-token',null ,{maxAge:0});
+        res.cookie('refresh-token',null ,{maxAge:0});
+        return res.status(200).json({msg:`user deleted successfully`})
+
+    }
+    catch(err){
+
+        return res.status(500).json({msg:err || `unknown server error`});
+    }
 })
 
 export default router;
