@@ -105,11 +105,19 @@ router.patch('/accept', isAuthenticated,async (req, res) => {
         return res.status(500).json({msg:err || 'unknowm server error'})
     }
 })
-
+/************************************************************************************
+ * !-url= http://localhost:5000/api/users
+ * !-Method= DELETE
+ * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
+ * * -PARAMS NULL
+ * * -BODY= NULL
+ * * -QEURY= NULL
+ * ? -RESPONSE=  200:[OK] => {msg:string}  
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
 router.delete('/', isAuthenticated,async (req, res) => {
     const {user_id} = req;
     try {
-
         await prisma.user.delete({where:{id:user_id} });
         res.cookie('access-token',null ,{maxAge:0});
         res.cookie('refresh-token',null ,{maxAge:0});
@@ -121,5 +129,25 @@ router.delete('/', isAuthenticated,async (req, res) => {
         return res.status(500).json({msg:err || `unknown server error`});
     }
 })
-
+/************************************************************************************
+ * !-url= http://localhost:5000/api/users/friends
+ * !-Method= GET
+ * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
+ * * -PARAMS NULL
+ * * -BODY= NULL
+ * * -QEURY= username:string 
+ * ? -RESPONSE=  200:[OK] => {firneds: [ {},{} ] }  
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
+router.get('/friends', isAuthenticated, async (req,res)=>{
+    const {user_id} = req;
+    try {
+        // const friends = [];
+        const friends = await prisma.user.findMany({where: {AND:{firends:{some:{id:user_id} }, friendof:{some: {id:user_id} },} },select:{id:true,first_name:true,last_name:true,username:true} });
+        return res.status(200).json({friends});
+    }
+    catch(err){
+        return res.status(500).json({msg:err || 'unknown server error'});
+    }
+})
 export default router;
