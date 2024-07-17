@@ -176,9 +176,20 @@ router.get("/friends", isAuthenticated, async (req, res) => {
   }
 });
 
+/************************************************************************************
+ * !-url= http://localhost:5000/api/users/id
+ * !-Method= GET
+ * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
+ * * -PARAMS id:UUID
+ * * -BODY= NULL
+ * * -QEURY= NULL
+ * ? -RESPONSE=  200:[OK] => {user:{}}
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
 router.get("/:id", isAuthenticated, async (req, res) => {
   const { id } = req.params;
   const { user_id } = req;
+  if(!uuidValidator(id)) return res.status(400).json({msg:`invalid param`})
   if (id === user_id) return res.status(302).json({ msg: 'need to go to profile route' })
   try {
     const { password, email, ...user } = await prisma.user.findUnique({
