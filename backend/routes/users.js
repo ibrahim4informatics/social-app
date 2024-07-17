@@ -155,10 +155,14 @@ router.delete("/", isAuthenticated, async (req, res) => {
  */
 router.get("/friends", isAuthenticated, async (req, res) => {
   const { user_id } = req;
+  const { username, first_name, last_name } = req.query;
   try {
     // const friends = [];
     const friends = await prisma.user.findMany({
       where: {
+        ...(username ? { username: { contains: username } } : {}),
+        ...(first_name ? { first_name: { contains: first_name } } : {}),
+        ...(last_name ? { last_name: { contains: last_name } } : {}),
         AND: {
           firends: { some: { id: user_id } },
           friendof: { some: { id: user_id } },
@@ -172,5 +176,23 @@ router.get("/friends", isAuthenticated, async (req, res) => {
   }
 });
 
+router.get("/:id", isAuthenticated, async (req, res) => {
+  const { id } = req.params;
+  const { user_id } = req;
+  if (id === user_id) return res.status(302).json({ msg: 'need to go to profile route' })
+  try {
+    const { password, email, ...user } = await prisma.user.findUnique({
+      where: {
+        id
+      },
+      include: { firends: true, friendof: true, posts: { include: { comments: { include: { user: { select: { id: true, first_name: true, last_name: true, username: true } } } } } } }
+    })
+
+    return res.status(200).json({ user })
+  }
+  catch (err) {
+    return res.status(500).json({ msg: err || `uknown server error` });
+  }
+});
 
 export default router;
