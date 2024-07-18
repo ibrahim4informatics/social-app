@@ -1,8 +1,8 @@
-import { Router } from "express";
+import { query, Router } from "express";
 import prisma from "../config/prisma.config.js";
 import isAuthenticated from "../midlewares/isAuthenticated.js";
 import uuidValidator from "../helpers/validation/uuidValidator.js";
-import {acceptUserFriendRequest, deleteUserProfile, getSingleUserProfile, getUserFriendsList, getUserProfile, sendUserFriendRequest} from '../controllers/users.js'
+import { acceptUserFriendRequest, deleteUserProfile, getSingleUserProfile, getUserFriendsList, getUserProfile, sendUserFriendRequest } from '../controllers/users.js'
 
 const router = Router();
 
@@ -58,7 +58,7 @@ router.patch("/accept", isAuthenticated, acceptUserFriendRequest);
  * ? -RESPONSE=  200:[OK] => {msg:string}
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.delete("/", isAuthenticated,deleteUserProfile);
+router.delete("/", isAuthenticated, deleteUserProfile);
 /************************************************************************************
  * !-url= http://localhost:5000/api/users/friends
  * !-Method= GET
@@ -71,8 +71,42 @@ router.delete("/", isAuthenticated,deleteUserProfile);
  */
 router.get("/friends", isAuthenticated, getUserFriendsList);
 
+
 /************************************************************************************
- * !-url= http://localhost:5000/api/users/id
+ * !-url= http://localhost:5000/api/users/search
+ * !-Method= GET
+ * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
+ * * -PARAMS NULL
+ * * -BODY= NULL
+ * * -QEURY= username
+ * ? -RESPONSE=  200:[OK] => {user:{}}
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
+router.get('/search', async (req, res) => {
+
+  const { user_id } = req;
+  const { page, username } = query;
+  try {
+    if (!page) return res.status(400).json({ msg: 'invalid url endpoint' });
+
+    const users = await prisma.user.findMany({
+      where: { NOT: { id: user_id }, ...(username ? { username: { contains: `${username}` } } : {}) },
+      select: { username: true, id: true },
+      orderBy:{username:'asc', createdAt:'desc'},
+      take: 25,
+      skip: (page - 1) * 25
+    });
+
+  }
+  catch (err) {
+    return res.status(500).json(({ msg: err || `unknown server error` }));
+  }
+
+
+})
+
+/************************************************************************************
+ * !-url= http://localhost:5000/api/users/:id
  * !-Method= GET
  * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
  * * -PARAMS id:UUID
@@ -81,5 +115,5 @@ router.get("/friends", isAuthenticated, getUserFriendsList);
  * ? -RESPONSE=  200:[OK] => {user:{}}
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.get("/:id", isAuthenticated,getSingleUserProfile );
+router.get("/:id", isAuthenticated, getSingleUserProfile);
 export default router;

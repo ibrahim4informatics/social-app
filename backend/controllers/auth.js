@@ -5,6 +5,7 @@ import genTokens from "../helpers/functions/genTokens.js";
 import strongPassword from "../helpers/validation/strongPassword.js";
 import hash from "../helpers/functions/hash.js";
 import { authConf } from "../config/cookies.conf.js";
+import usernameValidation from '../helpers/validation/usernameValidation.js';
 
 const loginUserController = async (req, res) => {
     const { email, password } = req.body;
@@ -31,6 +32,8 @@ const loginUserController = async (req, res) => {
 const registerUserController = async (req, res) => {
     const { email, username, first_name, last_name, password, confirm } = req.body;
     if (!email || !username || !first_name || !last_name || !password || !confirm) return res.status(400).json({ msg: 'missing data' });
+    if (!emailValidation(email)) return res.status(400).json({ msg: `email is not valid` });
+    if (!usernameValidation(username)) return res.status(400).json({ msg: `username is not valid` })
     try {
 
         const userEmail = await prisma.user.findUnique({ where: { email } });
