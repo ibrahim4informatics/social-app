@@ -3,7 +3,9 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { authRouter, commentRouter, postRouter, usersRouter } from './routes/routers.js'
-import multer from 'multer';
+
+
+import isAuthenticated from './midlewares/isAuthenticated.js';
 
 
 dotenv.config()
@@ -15,13 +17,14 @@ app.use(express.json());
 app.use(cors({ credentials: true, origin: '*' }));
 app.use(cookieParser());
 
+
 // using routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
-app.use('/api/posts', postRouter);
+app.use('/api/posts', isAuthenticated,postRouter);
 app.use('/api/comments', commentRouter);
-app.all('*', (_req,res)=>{
-    return res.status(404).json({msg:'route does not exist'})
+app.all('*', (_req, res) => {
+    return res.status(404).json({ msg: 'route does not exist' })
 })
 
 const server = app.listen(port, () => {
