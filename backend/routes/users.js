@@ -22,30 +22,6 @@ const router = Router();
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
 router.get("/", isAuthenticated, getUserProfile);
-
-
-/**
- * !-url= http://localhost:5000/api/users/followers
- * !-Method= GET
- * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
- * * -PARAMS NULL
- * * -BODY= NULL
- * * -QEURY= NULL
- * ? -RESPONSE=  200:[OK] => {user: all user information (check schema)}
- * ?             | 404:[NOT FOUND] =>{msg:"not found"}
- * ?             | 500:[INTERNAL ERROR]=>{msg:err}
- */
-router.get("/followers", isAuthenticated, async(req,res)=>{
-  const {user_id} = req;
-  try {
-    //TODO : get user followers
-
-  }
-  catch(err){
-    return res.status(500).json({msg: err || 'unknown server error'})
-  }
-});
-
 /**
  * !-url= http://localhost:5000/api/users
  * !-Method= DELETE

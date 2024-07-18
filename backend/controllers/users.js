@@ -9,6 +9,18 @@ const getUserProfile = async (req, res) => {
                 posts: {
                     include: { comments: { include: { user: true } } },
                 },
+                followers: {
+                    select: {
+                        id: true, username: true,
+                    },
+                    orderBy: { username: 'asc' }
+                },
+                following: {
+                    select: {
+                        id: true, username: true,
+                    },
+                    orderBy: { username: 'asc' }
+                }
             },
         });
         if (!user) throw new Error("user doesn't exist");
@@ -24,32 +36,32 @@ const followUser = async (req, res) => {
     const { id: following_id } = req.params;
     if (!uuidValidator(following_id)) return res.status(400).json({ msg: 'invalid url request' });
     try {
-  
-      const followingUser = await prisma.user.findUnique({where: {id:following_id, followers:{none:{id:user_id} } } });
-      if(!followingUser) return res.status(404).json({msg:`can not find or follow this user`});
-      await prisma.user.update({where:{id:user_id}, data:{following:{connect: { id:followingUser.id } }} });
-      return res.status(200).json({msg:`you just start following ${followingUser.username}`})
+
+        const followingUser = await prisma.user.findUnique({ where: { id: following_id, followers: { none: { id: user_id } } } });
+        if (!followingUser) return res.status(404).json({ msg: `can not find or follow this user` });
+        await prisma.user.update({ where: { id: user_id }, data: { following: { connect: { id: followingUser.id } } } });
+        return res.status(200).json({ msg: `you just start following ${followingUser.username}` })
     }
     catch (err) {
-      return res.status(500).json({ msg: err || 'unknown server error' })
+        return res.status(500).json({ msg: err || 'unknown server error' })
     }
-  }
+}
 
-  const unfollowUser = async (req, res) => {
+const unfollowUser = async (req, res) => {
     const { user_id } = req;
     const { id: following_id } = req.params;
     if (!uuidValidator(following_id)) return res.status(400).json({ msg: 'invalid url request' });
     try {
-  
-      const followingUser = await prisma.user.findUnique({where: {id:following_id, followers:{some:{id:user_id} } } });
-      if(!followingUser) return res.status(404).json({msg:`can not find or unfollow this user`});
-      await prisma.user.update({where:{id:user_id}, data:{following:{disconnect: { id:followingUser.id } }} });
-      return res.status(200).json({msg:`you just unfollowed ${followingUser.username}`})
+
+        const followingUser = await prisma.user.findUnique({ where: { id: following_id, followers: { some: { id: user_id } } } });
+        if (!followingUser) return res.status(404).json({ msg: `can not find or unfollow this user` });
+        await prisma.user.update({ where: { id: user_id }, data: { following: { disconnect: { id: followingUser.id } } } });
+        return res.status(200).json({ msg: `you just unfollowed ${followingUser.username}` })
     }
     catch (err) {
-      return res.status(500).json({ msg: err || 'unknown server error' })
+        return res.status(500).json({ msg: err || 'unknown server error' })
     }
-  }
+}
 
 
 const deleteUserProfile = async (req, res) => {
