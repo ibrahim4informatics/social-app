@@ -19,68 +19,37 @@ const getUserProfile = async (req, res) => {
 }
 
 
-const sendUserFriendRequest = async (req, res) => {
-    //* curent user id
-    const { user_id: id } = req;
-    //* receiver user id
-    const receiver_id = req.body.rid;
-    //* check receiver user id to be uuid to protect
-    if (!uuidValidator(receiver_id) || id === receiver_id)
-        return res.status(400).json({ msg: "invalid data" });
+const followUser = async (req, res) => {
+    const { user_id } = req;
+    const { id: following_id } = req.params;
+    if (!uuidValidator(following_id)) return res.status(400).json({ msg: 'invalid url request' });
     try {
-        //* make sure that the reciever does not received previous friend request and is not already a friend
-        const ruser = await prisma.user.findUnique({
-            where: { id: receiver_id, friendof: { none: { id } } },
-        });
-        if (!ruser)
-            return res
-                .status(404)
-                .json({ msg: "can not send freind request to this user" });
-        //* updating curent user to add the receiver to his friends
-        await prisma.user.update({
-            where: { id },
-            data: { firends: { connect: { id: ruser.id } } },
-        });
-        //* returning status of 200 and success message
-        return res.status(200).json({ msg: "friend request sent" });
-    } catch (err) {
-        return res.status(500).json({ msg: err || "unknowm server error" });
+  
+      const followingUser = await prisma.user.findUnique({where: {id:following_id, followers:{none:{id:user_id} } } });
+      if(!followingUser) return res.status(404).json({msg:`can not find or follow this user`});
+      await prisma.user.update({where:{id:user_id}, data:{following:{connect: { id:followingUser.id } }} });
+      return res.status(200).json({msg:`you just start following ${followingUser.username}`})
     }
-}
+    catch (err) {
+      return res.status(500).json({ msg: err || 'unknown server error' })
+    }
+  }
 
-const acceptUserFriendRequest = async (req, res) => {
-    //* curent user id
-    const { user_id: id } = req;
-    //* the id of the user who sent a freind request
-    const sender_id = req.body.sid;
-    //* validating the id with function to protect
-    if (!uuidValidator(sender_id) || id === sender_id)
-        return res.status(400).json({ msg: "invalid data" });
+  const unfollowUser = async (req, res) => {
+    const { user_id } = req;
+    const { id: following_id } = req.params;
+    if (!uuidValidator(following_id)) return res.status(400).json({ msg: 'invalid url request' });
     try {
-        //* get sender user and make sure that is not already a friend and make sure that is send a request to the current user
-        const suser = await prisma.user.findUnique({
-            where: {
-                id: sender_id,
-                friendof: { none: { id } },
-                firends: { some: { id } },
-            },
-        });
-        if (!suser)
-            return res
-                .status(404)
-                .json({ msg: "can not accept freind request to this user" });
-        //* updating the sender user and make the current user a friend to him (accepting process)
-        await prisma.user.update({
-            where: { id: sender_id },
-            data: { friendof: { connect: { id } } },
-        });
-        //* returning a status of 200 of success
-        return res.status(200).json({ msg: "friend request accepted" });
-    } catch (err) {
-        //* hundling unexprected errors
-        return res.status(500).json({ msg: err || "unknowm server error" });
+  
+      const followingUser = await prisma.user.findUnique({where: {id:following_id, followers:{some:{id:user_id} } } });
+      if(!followingUser) return res.status(404).json({msg:`can not find or unfollow this user`});
+      await prisma.user.update({where:{id:user_id}, data:{following:{disconnect: { id:followingUser.id } }} });
+      return res.status(200).json({msg:`you just unfollowed ${followingUser.username}`})
     }
-}
+    catch (err) {
+      return res.status(500).json({ msg: err || 'unknown server error' })
+    }
+  }
 
 
 const deleteUserProfile = async (req, res) => {
@@ -138,7 +107,33 @@ const getSingleUserProfile = async (req, res) => {
     }
 }
 
+const searchForUsers = async (req, res) => {
+
+    const { user_id } = req;
+    const { page, username } = query;
+    try {
+        if (!page) return res.status(400).json({ msg: 'invalid url endpoint' });
+        if (!usernameValidation(username)) return res.status(400).json({ msg: `invalid data provided` });
+
+        const users = await prisma.user.findMany({
+            where: { NOT: { id: user_id }, ...(username ? { username: { contains: `${username}` } } : {}) },
+            select: { username: true, id: true },
+            orderBy: { username: 'asc', createdAt: 'desc' },
+            take: 25,
+            skip: (page - 1) * 25
+        });
+
+        return res.status(200).json({ users })
+
+    }
+    catch (err) {
+        return res.status(500).json(({ msg: err || `unknown server error` }));
+    }
+
+
+}
+
 export {
-    getUserProfile, sendUserFriendRequest, acceptUserFriendRequest,
-    deleteUserProfile, getUserFriendsList, getSingleUserProfile
+    getUserProfile, followUser, unfollowUser,
+    deleteUserProfile, getUserFriendsList, getSingleUserProfile, searchForUsers
 }

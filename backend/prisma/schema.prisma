@@ -21,8 +21,8 @@ model User {
   username   String    @unique @db.VarChar(255)
   email      String    @unique @db.VarChar(255)
   password   String    @db.VarChar(255)
-  firends    User[]    @relation("firendship")
-  friendof   User[]    @relation("firendship")
+  followers    User[]    @relation("firendship")
+  following   User[]    @relation("firendship")
   posts      Post[]
   comments   Comment[]
   createdAt  DateTime  @default(now())

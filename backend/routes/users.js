@@ -1,8 +1,6 @@
-import { query, Router } from "express";
-import prisma from "../config/prisma.config.js";
+import { Router } from "express";
 import isAuthenticated from "../midlewares/isAuthenticated.js";
-import uuidValidator from "../helpers/validation/uuidValidator.js";
-import { acceptUserFriendRequest, deleteUserProfile, getSingleUserProfile, getUserFriendsList, getUserProfile, sendUserFriendRequest } from '../controllers/users.js'
+import { deleteUserProfile, followUser, getSingleUserProfile, getUserFriendsList, getUserProfile, searchForUsers, unfollowUser } from '../controllers/users.js'
 
 const router = Router();
 
@@ -24,40 +22,43 @@ const router = Router();
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
 router.get("/", isAuthenticated, getUserProfile);
-/*********************************************************************************
- * !-url= http://localhost:5000/api/users/send
- * !-Method= POST
+
+
+/**
+ * !-url= http://localhost:5000/api/users/followers
+ * !-Method= GET
  * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
  * * -PARAMS NULL
- * * -BODY= {rid:uuid (receiver id),}
+ * * -BODY= NULL
  * * -QEURY= NULL
- * ? -RESPONSE=  200:[OK] => {msg:string}
- * ?             | 404:[NOT FOUND] =>{msg:"user not found"}
+ * ? -RESPONSE=  200:[OK] => {user: all user information (check schema)}
+ * ?             | 404:[NOT FOUND] =>{msg:"not found"}
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.patch("/send", isAuthenticated, sendUserFriendRequest);
-/************************************************************************************
- * !-url= http://localhost:5000/api/users/accept
- * !-Method= POST
- * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
- * * -PARAMS NULL
- * * -BODY= {sid:uuid (sender id),}
- * * -QEURY= NULL
- * ? -RESPONSE=  200:[OK] => {msg:string}
- * ?             | 404:[NOT FOUND] =>{msg:"user not found"}
- * ?             | 500:[INTERNAL ERROR]=>{msg:err}
- */
-router.patch("/accept", isAuthenticated, acceptUserFriendRequest);
-/************************************************************************************
+router.get("/followers", isAuthenticated, async(req,res)=>{
+  const {user_id} = req;
+  try {
+    //TODO : get user followers
+
+  }
+  catch(err){
+    return res.status(500).json({msg: err || 'unknown server error'})
+  }
+});
+
+/**
  * !-url= http://localhost:5000/api/users
  * !-Method= DELETE
  * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
  * * -PARAMS NULL
  * * -BODY= NULL
  * * -QEURY= NULL
- * ? -RESPONSE=  200:[OK] => {msg:string}
+ * ? -RESPONSE=  200:[OK] => {user: all user information (check schema)}
+ * ?             | 404:[NOT FOUND] =>{msg:"not found"}
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
+router.delete('/', isAuthenticated, deleteUserProfile)
+/************************************************************************************
 router.delete("/", isAuthenticated, deleteUserProfile);
 /************************************************************************************
  * !-url= http://localhost:5000/api/users/friends
@@ -70,6 +71,31 @@ router.delete("/", isAuthenticated, deleteUserProfile);
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
 router.get("/friends", isAuthenticated, getUserFriendsList);
+/*********************************************************************************
+ * !-url= http://localhost:5000/api/users/follow/:id
+ * !-Method= POST
+ * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
+ * * -PARAMS id:uuid user you want to follow
+ * * -BODY= NULL
+ * * -QEURY= NULL
+ * ? -RESPONSE=  200:[OK] => {msg:string}
+ * ?             | 404:[NOT FOUND] =>{msg:"user not found"}
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
+router.patch("/follow/:id", isAuthenticated, followUser);
+/*********************************************************************************
+ * !-url= http://localhost:5000/api/users/unfollow/:id
+ * !-Method= POST
+ * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
+ * * -PARAMS id:uuid user you want to unfollow
+ * * -BODY= NULL
+ * * -QEURY= NULL
+ * ? -RESPONSE=  200:[OK] => {msg:string}
+ * ?             | 404:[NOT FOUND] =>{msg:"user not found"}
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
+router.patch("/unfollow/:id", isAuthenticated, unfollowUser);
+
 
 
 /************************************************************************************
@@ -82,28 +108,7 @@ router.get("/friends", isAuthenticated, getUserFriendsList);
  * ? -RESPONSE=  200:[OK] => {user:{}}
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.get('/search', async (req, res) => {
-
-  const { user_id } = req;
-  const { page, username } = query;
-  try {
-    if (!page) return res.status(400).json({ msg: 'invalid url endpoint' });
-
-    const users = await prisma.user.findMany({
-      where: { NOT: { id: user_id }, ...(username ? { username: { contains: `${username}` } } : {}) },
-      select: { username: true, id: true },
-      orderBy:{username:'asc', createdAt:'desc'},
-      take: 25,
-      skip: (page - 1) * 25
-    });
-
-  }
-  catch (err) {
-    return res.status(500).json(({ msg: err || `unknown server error` }));
-  }
-
-
-})
+router.get('/search', searchForUsers)
 
 /************************************************************************************
  * !-url= http://localhost:5000/api/users/:id
