@@ -95,9 +95,7 @@ const getSingleUserProfile = async (req, res) => {
         return res.status(500).json({ msg: err || `uknown server error` });
     }
 }
-
 const searchForUsers = async (req, res) => {
-
     const { user_id } = req;
     const { page, username } = req.query;
     try {
@@ -119,10 +117,7 @@ const searchForUsers = async (req, res) => {
     catch (err) {
         return res.status(500).json(({ msg: err || `unknown server error` }));
     }
-
-
 }
-
 export {
     getUserProfile, followUser, unfollowUser,
     deleteUserProfile, getSingleUserProfile, searchForUsers
