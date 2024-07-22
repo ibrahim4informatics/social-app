@@ -1,5 +1,6 @@
 import uuidValidator from "../helpers/validation/uuidValidator.js";
 import prisma from '../config/prisma.config.js';
+import usernameValidation from '../helpers/validation/usernameValidation.js';
 const getUserProfile = async (req, res) => {
     const { user_id: id } = req;
     try {
@@ -98,15 +99,16 @@ const getSingleUserProfile = async (req, res) => {
 const searchForUsers = async (req, res) => {
 
     const { user_id } = req;
-    const { page, username } = query;
+    const { page, username } = req.query;
     try {
+
         if (!page) return res.status(400).json({ msg: 'invalid url endpoint' });
         if (!usernameValidation(username)) return res.status(400).json({ msg: `invalid data provided` });
 
         const users = await prisma.user.findMany({
             where: { NOT: { id: user_id }, ...(username ? { username: { contains: `${username}` } } : {}) },
             select: { username: true, id: true },
-            orderBy: { username: 'asc', createdAt: 'desc' },
+            orderBy: [{ username: 'asc' }, { createdAt: 'desc' }],
             take: 25,
             skip: (page - 1) * 25
         });
