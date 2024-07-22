@@ -1,0 +1,1 @@
+export default (file_name) =>  /\.(png|jpe?g|gif|bmp)$/i.test(file_name)

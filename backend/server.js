@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import fileUpload from 'express-fileupload';
 import cookieParser from 'cookie-parser';
 import { authRouter, commentRouter, postRouter, usersRouter } from './routes/routers.js'
 
@@ -16,6 +17,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors({ credentials: true, origin: '*' }));
 app.use(cookieParser());
+app.use(fileUpload({}))
 
 
 // using routes
