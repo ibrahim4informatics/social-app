@@ -75,30 +75,6 @@ const deleteUserProfile = async (req, res) => {
         return res.status(500).json({ msg: err || `unknown server error` });
     }
 }
-
-const getUserFriendsList = async (req, res) => {
-    const { user_id } = req;
-    const { username, first_name, last_name } = req.query;
-    try {
-        // const friends = [];
-        const friends = await prisma.user.findMany({
-            where: {
-                ...(username ? { username: { contains: username } } : {}),
-                ...(first_name ? { first_name: { contains: first_name } } : {}),
-                ...(last_name ? { last_name: { contains: last_name } } : {}),
-                AND: {
-                    firends: { some: { id: user_id } },
-                    friendof: { some: { id: user_id } },
-                },
-            },
-            select: { id: true, first_name: true, last_name: true, username: true },
-        });
-        return res.status(200).json({ friends });
-    } catch (err) {
-        return res.status(500).json({ msg: err || "unknown server error" });
-    }
-}
-
 const getSingleUserProfile = async (req, res) => {
     const { id } = req.params;
     const { user_id } = req;
@@ -147,5 +123,5 @@ const searchForUsers = async (req, res) => {
 
 export {
     getUserProfile, followUser, unfollowUser,
-    deleteUserProfile, getUserFriendsList, getSingleUserProfile, searchForUsers
+    deleteUserProfile, getSingleUserProfile, searchForUsers
 }

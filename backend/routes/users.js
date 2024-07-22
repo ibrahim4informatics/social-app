@@ -1,6 +1,6 @@
 import { Router } from "express";
 import isAuthenticated from "../midlewares/isAuthenticated.js";
-import { deleteUserProfile, followUser, getSingleUserProfile, getUserFriendsList, getUserProfile, searchForUsers, unfollowUser } from '../controllers/users.js'
+import { deleteUserProfile, followUser, getSingleUserProfile, getUserProfile, searchForUsers, unfollowUser } from '../controllers/users.js'
 
 const router = Router();
 
@@ -34,19 +34,6 @@ router.get("/", isAuthenticated, getUserProfile);
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
 router.delete('/', isAuthenticated, deleteUserProfile)
-/************************************************************************************
-router.delete("/", isAuthenticated, deleteUserProfile);
-/************************************************************************************
- * !-url= http://localhost:5000/api/users/friends
- * !-Method= GET
- * !-Midlewares= isAuthenticated : /midlewares/isAuthenticated.js|
- * * -PARAMS NULL
- * * -BODY= NULL
- * * -QEURY= username:string
- * ? -RESPONSE=  200:[OK] => {firneds: [ {},{} ] }
- * ?             | 500:[INTERNAL ERROR]=>{msg:err}
- */
-router.get("/friends", isAuthenticated, getUserFriendsList);
 /*********************************************************************************
  * !-url= http://localhost:5000/api/users/follow/:id
  * !-Method= POST
@@ -71,9 +58,6 @@ router.patch("/follow/:id", isAuthenticated, followUser);
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
 router.patch("/unfollow/:id", isAuthenticated, unfollowUser);
-
-
-
 /************************************************************************************
  * !-url= http://localhost:5000/api/users/search
  * !-Method= GET
@@ -85,7 +69,6 @@ router.patch("/unfollow/:id", isAuthenticated, unfollowUser);
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
 router.get('/search', searchForUsers)
-
 /************************************************************************************
  * !-url= http://localhost:5000/api/users/:id
  * !-Method= GET
