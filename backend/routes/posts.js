@@ -1,59 +1,68 @@
 import { Router } from "express";
-import prisma from '../config/prisma.config.js';
-import uploadImage from "../helpers/functions/uploadImage.js";
-import isValidImage from "../helpers/validation/isValidImage.js";
-
+import { createUserPost, deleteuserPostById, getUserFollowingPostById, getUserFollowingPosts, updateUserPostById } from "../controllers/posts.js";
 const router = Router();
-
-router.get('/', async (req, res) => {
-    return res.status(200).json({ id: req.user_id })
-})
-
-
-
-router.post('/', async (req, res) => {
-    const { caption } = req.body;
-    const  picture  = req.files?.picture || null
-    const { user_id: id } = req;
-
-    if (!caption && !picture) return res.status(400).json({ msg: 'no data to post' });
-    let picture_url = null;
-    try {
-
-
-        const user = await prisma.user.findUnique({ where: { id } });
-        if (!user) return res.status(404).json({ msg: 'can not proceed to this action' });
-        if (picture) {
-            if(!isValidImage(picture.name)) return res.status(400).json({msg:'invalid image type'})
-            picture_url = await uploadImage(picture, id);
-        }
-        if (picture_url === -1) return res.status(400).json({ msg: 'error while uploading image' });
-        const newPost = await prisma.post.create({
-            data: {
-                user: { connect: { id } },
-                picture: picture_url,
-                ...(caption !== undefined ? { caption } : {})
-            }
-
-        })
-
-        return res.status(201).json({ post: newPost })
-
-    }
-    catch (err) {
-        console.log(err)
-        return res.status(500).json({ msg: err || "unknown server error" })
-    }
-})
-
-
-
-router.patch('/', async (req, res) => {
-    res.sendStatus(200)
-})
-
-router.delete('/', async (req, res) => {
-    res.sendStatus(200)
-})
-
+/************************************************************************************
+ * !-url= http://localhost:5000/api/posts
+ * !-Method= GET
+ * !-Midlewares= IsAutenticated /midlewares/isAuthenticated.js
+ * * -PARAMS :NULL
+ * * -BODY= {formdata: (caption:string, picture:image) }
+ * * -QEURY= caption:string, page:number
+ * ? -RESPONSE=  200:[OK] => {posts, pages:{total:number,current:number}}
+ * ?             400:[BAD]=> {msg:string}
+ * 
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
+router.get('/', getUserFollowingPosts)
+/************************************************************************************
+ * !-url= http://localhost:5000/api/posts
+ * !-Method= POST
+ * !-Midlewares= IsAutenticated /midlewares/isAuthenticated.js
+ * * -PARAMS :NULL
+ * * -BODY= {formdata: (caption:string, picture:image) }
+ * * -QEURY= NULL
+ * ? -RESPONSE=  201:[CREATED] => {msg:string}
+ * ?             400:[BAD]=> {msg:string}
+ * 
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
+router.post('/', createUserPost)
+/************************************************************************************
+ * !-url= http://localhost:5000/api/posts/:id
+ * !-Method= GET
+ * !-Midlewares= IsAutenticated /midlewares/isAuthenticated.js
+ * * -PARAMS : id:uuid
+ * * -BODY= NULL
+ * * -QEURY= NULL
+ * ? -RESPONSE=  200:[CREATED] => {post:{}}
+ * ?             400:[BAD]=> {msg:string}
+ * 
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
+router.get('/:id', getUserFollowingPostById)
+/************************************************************************************
+ * !-url= http://localhost:5000/api/posts/:id
+ * !-Method= PATCH
+ * !-Midlewares= IsAutenticated /midlewares/isAuthenticated.js
+ * * -PARAMS :id:uuid
+ * * -BODY= {formdata: (caption:string || null, picture:image || null) }
+ * * -QEURY= NULL
+ * ? -RESPONSE=  201:[CREATED] => {msg:string}
+ * ?             400:[BAD]=> {msg:string}
+ * 
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
+router.patch('/:id', updateUserPostById)
+/************************************************************************************
+ * !-url= http://localhost:5000/api/posts/:id
+ * !-Method= DELETE
+ * !-Midlewares= IsAutenticated /midlewares/isAuthenticated.js
+ * * -PARAMS id:uuid
+ * * -BODY= NULL
+ * * -QEURY= NULL
+ * ? -RESPONSE=   200:[OK] => {msg:string}
+ * ?             |404:[NOT FOUND]=> {msg:string}
+ * ?             | 500:[INTERNAL ERROR]=>{msg:err}
+ */
+router.delete('/:id', deleteuserPostById)
 export default router;

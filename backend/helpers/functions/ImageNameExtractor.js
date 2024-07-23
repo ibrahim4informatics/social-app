@@ -1,0 +1,1 @@
+export default (url)=> url.split("%2F")[1].split('?')[0];

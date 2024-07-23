@@ -21,20 +21,21 @@ model User {
   username   String    @unique @db.VarChar(255)
   email      String    @unique @db.VarChar(255)
   password   String    @db.VarChar(255)
-  followers    User[]    @relation("firendship")
-  following   User[]    @relation("firendship")
+  followers  User[]    @relation("firendship")
+  following  User[]    @relation("firendship")
   posts      Post[]
   comments   Comment[]
   createdAt  DateTime  @default(now())
 }
 
 model Post {
-  id       String    @id @default(uuid())
-  caption  String?   @db.VarChar(300)
-  picture  String? @db.LongText
-  user_id  String
-  user     User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  comments Comment[]
+  id        String    @id @default(uuid())
+  caption   String?   @db.VarChar(300)
+  picture   String?   @db.LongText
+  user_id   String
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  createdAt DateTime  @default(now())
 }
 
 model Comment {
