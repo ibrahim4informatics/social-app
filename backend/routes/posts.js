@@ -13,7 +13,7 @@ const router = Router();
  * 
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.get('/', getUserFollowingPosts)
+router.get('/', getUserFollowingPosts);
 /************************************************************************************
  * !-url= http://localhost:5000/api/posts
  * !-Method= POST
@@ -26,7 +26,7 @@ router.get('/', getUserFollowingPosts)
  * 
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.post('/', createUserPost)
+router.post('/', createUserPost);
 /************************************************************************************
  * !-url= http://localhost:5000/api/posts/:id
  * !-Method= GET
@@ -39,7 +39,7 @@ router.post('/', createUserPost)
  * 
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.get('/:id', getUserFollowingPostById)
+router.get('/:id', getUserFollowingPostById);
 /************************************************************************************
  * !-url= http://localhost:5000/api/posts/:id
  * !-Method= PATCH
@@ -52,7 +52,7 @@ router.get('/:id', getUserFollowingPostById)
  * 
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.patch('/:id', updateUserPostById)
+router.patch('/:id', updateUserPostById);
 /************************************************************************************
  * !-url= http://localhost:5000/api/posts/:id
  * !-Method= DELETE
@@ -64,5 +64,5 @@ router.patch('/:id', updateUserPostById)
  * ?             |404:[NOT FOUND]=> {msg:string}
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.delete('/:id', deleteuserPostById)
+router.delete('/:id', deleteuserPostById);
 export default router;
