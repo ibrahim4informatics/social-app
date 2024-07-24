@@ -23,8 +23,8 @@ app.use(fileUpload({}))
 // using routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
-app.use('/api/posts', isAuthenticated,postRouter);
-app.use('/api/comments', commentRouter);
+app.use('/api/posts', isAuthenticated, postRouter);
+app.use('/api/comments', isAuthenticated, commentRouter);
 app.all('*', (_req, res) => {
     return res.status(404).json({ msg: 'route does not exist' })
 })
