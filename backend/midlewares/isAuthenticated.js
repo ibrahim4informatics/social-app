@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { authConf } from '../config/cookies.conf.js';
-
+import { decrypterToken } from '../helpers/functions/tokenEncryption.js';
 const refreshToken = async (req, res, next) => {
     try {
 
@@ -17,17 +17,25 @@ const refreshToken = async (req, res, next) => {
         return res.status(401).json({ msg: 'log in please!' })
     }
 }
-
-
-
 export default async (req, res, next) => {
+    let token;
     try {
-        const { id } = await jwt.verify(req.cookies['access-token'], process.env.ACCESS);
+
+        if (req.headers["x-platform"] === "MOBILE") {
+            token = decrypterToken(req.headers["Authorization"]);
+        }
+        else {
+            token = req.cookies['access-token'];
+        }
+        const { id } = await jwt.verify(token, process.env.ACCESS);
         req.user_id = id;
         next()
 
     }
     catch (err) {
-        refreshToken(req, res, next)
+        if (req.headers['x-platform'] !== "MOBILE") {
+            refreshToken();
+        }
+        return res.status(401).json({ msg: "invalid or expired token provided" });
     }
 }

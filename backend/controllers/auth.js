@@ -6,6 +6,7 @@ import strongPassword from "../helpers/validation/strongPassword.js";
 import hash from "../helpers/functions/hash.js";
 import { authConf } from "../config/cookies.conf.js";
 import usernameValidation from '../helpers/validation/usernameValidation.js';
+import { crypterToken } from '../helpers/functions/tokenEncryption.js';
 
 const loginUserController = async (req, res) => {
     const { email, password } = req.body;
@@ -20,6 +21,13 @@ const loginUserController = async (req, res) => {
         if (!passCheck) return res.status(401).json({ msg: 'invalid email or password' });
         const tokens = genTokens({ id: user.id });
         if (tokens === -1) return res.status(500).json({ msg: 'can not generate tokens' });
+        // res.cookie('refresh-token', tokens.refreshToken, authConf.refresh);
+        // res.cookie('access-token', tokens.accessToken, authConf.access);
+        // return res.status(200).json({ msg: 'user is logged in' })
+        console.log(req.headers["x-platform"])
+        if (req.headers['x-platform'] === "MOBILE") {
+            return res.status(200).json({ accessToken: crypterToken(tokens.accessToken), refreshToken: crypterToken(tokens.refreshToken) })
+        }
         res.cookie('refresh-token', tokens.refreshToken, authConf.refresh);
         res.cookie('access-token', tokens.accessToken, authConf.access);
         return res.status(200).json({ msg: 'user is logged in' })
