@@ -7,7 +7,7 @@ import ImageNameExtractor from "../helpers/functions/ImageNameExtractor.js";
 const getUserFollowingPosts = async (req, res) => {
     const { user_id } = req;
     const { caption, page } = req.query;
-    if (!page || Number.parseInt(page) === NaN) return res.status(400).json("missing parameters in url");
+    if (!page || Number.parseInt(page) === NaN) return res.status(400).json({msg:"missing parameters in url"});
     try {
         const user = await prisma.user.findUnique({ where: { id: user_id }, select: { following: { select: { id: true } } } });
         if (!user) return res.status(403).json({ msg: "can not perform this action" });
