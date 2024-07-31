@@ -14,10 +14,10 @@ const Login = () => {
     <Box display={"flex"}>
       <Box
         width={{ base: "100%", lg: "50%" }} height={{ base: "100svh", lg: "100vh" }} bg={''} display={'flex'}
-        alignItems={'center'} justifyContent={'center'}
+        alignItems={'center'} justifyContent={{base:"center", lg:"start"}}
       >
-        <Box w={"90%"} maxW={600} bg={''} py={4} px={2}>
-          <Heading mb={2}>Welcome!</Heading>
+        <Box w={"90%"} maxW={600} bg={''} ml={5} py={4} px={2}>
+          <Heading mb={2}>Welcome Back!</Heading>
           <FormControl isRequired my={4}>
             <FormLabel>Email</FormLabel>
             <Input onChange={hundleInputChange} size={{ base: "md", md: "lg" }} name='email' type='email' value={data.email} variant={"filled"} />
@@ -38,7 +38,7 @@ const Login = () => {
         bg={'black'} width={"50%"} height={{ base: "100svh", lg: "100vh" }} display={{ base: "none", lg: "flex" }}
         alignItems={"center"} justifyContent={"center"}
       >
-        <Image src={loginSvg} width={"80%"} alt='error'  />
+        <Image src={loginSvg} maxW={650} width={"80%"} alt='error'  />
       </Box>
     </Box>
   )
