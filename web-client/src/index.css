@@ -56,3 +56,22 @@
   font-style: normal;
 }
 
+.sidebar-position {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+}
+
+@media screen  and (min-width: 48em) {
+  .sidebar-position {
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+}
+.active {
+  color: #1f1f35;
+  background-color: #805ad5;
+  
+}
