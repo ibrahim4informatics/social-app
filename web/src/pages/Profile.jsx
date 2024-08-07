@@ -5,36 +5,21 @@ import Post from '../components/Post'
 import { UserContext } from '../contexts/UserContext';
 import Loader from '../components/Loader';
 import { AiOutlineEdit } from 'react-icons/ai';
+import formatFollowers from '../functions/formatFollowers';
+import { useFetch } from '../hooks/useFetch';
+import { fetcher } from '../axios.conf';
 
 
-const formatFollowers = (number) => {
-  let n = number
-  let i = 1
-  while (Math.floor(n / 10) > 0) {
-    n = Math.floor(n / 10);
-    i++
-  }
-  if (i >= 1 && i < 4) {
-    return number
-  }
-  else if (i >= 4 && i < 7) {
-    return `${(number / 10 ** 3).toFixed(2)}K`
-  }
-
-  else if (i >= 7 && i < 9) {
-    return `${(number / 10 ** 7).toFixed(2)}M`
-  }
-
-  else {
-    return `${(number / 10 ** 9).toFixed(2)}B`
-  }
-
-}
 
 
 const Profile = () => {
 
   const [user, setUser] = useContext(UserContext);
+  const { data, error, isLoading } = useFetch("/api/users");
+  useEffect(() => {
+    if (!isLoading && data) setUser((data?.user));
+    
+  }, [isLoading])
 
   return (
     <Layout>
@@ -48,12 +33,12 @@ const Profile = () => {
             </Box>
 
             <Box bg={'purple.100'} p={4} rounded={'xl'} display={'flex'} flexDir={'column'} alignItems={'center'} justifyContent={'center'}>
-              <Heading size={'md'} mb={1}>{formatFollowers(user.followers)}</Heading>
+              <Heading size={'md'} mb={1}>{formatFollowers(user.followers.length)}</Heading>
               <Text fontSize={16} fontWeight={'bold'}>Followers</Text>
             </Box>
 
             <Box bg={'purple.100'} p={4} rounded={'xl'} display={'flex'} flexDir={'column'} alignItems={'center'} justifyContent={'center'}>
-              <Heading size={'md'} mb={1}>{formatFollowers(user.following)}</Heading>
+              <Heading size={'md'} mb={1}>{formatFollowers(user.following.length)}</Heading>
               <Text fontSize={16} fontWeight={'bold'}>Following</Text>
             </Box>
 
@@ -92,7 +77,7 @@ const Profile = () => {
                   </FormControl>
                   <Box mt={3} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
                     <Button colorScheme='red'>Change Password</Button>
-                    <Button colorScheme='purple'><AiOutlineEdit/>Edit Profile</Button>
+                    <Button colorScheme='purple'><AiOutlineEdit />Edit Profile</Button>
                   </Box>
                 </TabPanel>
               </TabPanels>

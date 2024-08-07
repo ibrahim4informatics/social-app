@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createUserPost, deleteuserPostById, getUserFollowingPostById, getUserFollowingPosts, updateUserPostById } from "../controllers/posts.js";
+import { createUserPost, deleteuserPostById, getPostById, getUserFollowingPosts, updateUserPostById } from "../controllers/posts.js";
 const router = Router();
 /************************************************************************************
  * !-url= http://localhost:5000/api/posts
@@ -39,7 +39,7 @@ router.post('/', createUserPost);
  * 
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.get('/:id', getUserFollowingPostById);
+router.get('/:id', getPostById);
 /************************************************************************************
  * !-url= http://localhost:5000/api/posts/:id
  * !-Method= PATCH

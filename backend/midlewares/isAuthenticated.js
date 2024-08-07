@@ -6,9 +6,9 @@ const refreshToken = async (req, res, next) => {
 
         const { id } = await jwt.verify(req.cookies['refresh-token'], process.env.REFRESH);
         const newAccessToken = jwt.sign({ id }, process.env.ACCESS, { expiresIn: '5m' });
-        res.cookie('access-token', newAccessToken, authConf.access);
         req.user_id = id
-        return next()
+        res.cookie('access-token', newAccessToken, authConf.access);
+        next()
 
 
     }
@@ -34,7 +34,7 @@ export default async (req, res, next) => {
     }
     catch (err) {
         if (req.headers['x-platform'] !== "MOBILE") {
-            refreshToken();
+            return refreshToken(req,res,next);
         }
         return res.status(401).json({ msg: "invalid or expired token provided" });
     }

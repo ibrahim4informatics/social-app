@@ -1,22 +1,71 @@
-import {  Container } from '@chakra-ui/react'
-import React, { useState, useRef } from 'react';
+import { Badge, Container } from '@chakra-ui/react'
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout'
 import Post from '../components/Post';
+import InfinitScrollComponenet from 'react-infinite-scroll-component'
+import Loader from '../components/Loader';
+import { fetcher } from '../axios.conf';
 
 const Home = () => {
-  const [posts, setposts] = useState([
-    {caption:"my new laptop!", user:{username:"John Wick", id:1}, picture:"https://images.pexels.com/photos/205421/pexels-photo-205421.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", id:1},
-    {caption:"hello i am new here", user:{username:"Newbi", id:2},id:2},
-    {caption:"مرحبا كيف حالكم", user:{username:"Maissoun Boumer", id:2},id:3},
-    {caption:"hello i am new here", user:{username:"Newbi", id:2},id:4},
-    {caption:"hello i am new here", user:{username:"Newbi", id:2},id:5},
-  ]);
+  const [page, setPage] = useState(2);
+  const [posts, setPosts] = useState([]);
+  const [hasmore, setHasmore] = useState(true);
+  const [payload, setPayload] = useState({});
+
+  useEffect(() => {
+    fetcher.get(`/api/posts?page=1`).then(res => {
+      if (res.status === 200) {
+        setPosts(res.data.posts);
+        setPayload(res.data.page);
+      }
+    })
+      .catch(err => {
+        console.log(err);
+        return;
+      })
+  }, [])
+
+  const hundleNext = async () => {
+    if (page < payload.total) {
+      setPage(prev => prev + 1);
+    }
+    else {
+      setHasmore(false)
+    }
+    try {
+
+      const res = await fetcher.get(`/api/posts?page=${page}`);
+      if (res.status === 200) {
+        setPosts(prev => prev.concat(res.data.posts));
+        setPayload(res.data.page);
+      }
+
+    }
+    catch (err) {
+      console.log(err);
+      return;
+    }
+  }
 
 
   return (
     <Layout>
       <Container mt={2}>
-       {posts.length > 0 ? posts.map(post=> <Post id={post.id} key={post.id} caption={post.caption} picture={post.picture} user={post.user} />) : ''}
+
+        {posts === null ? <Loader /> : (
+          <InfinitScrollComponenet
+            dataLength={posts.length} hasMore={hasmore} loader={<Loader />} next={hundleNext} endMessage={<Badge w={'100%'} py={2} rounded={'md'} textAlign={'center'} colorScheme='purple'>End Of The Feed</Badge>}
+          >
+
+
+
+            {posts.length > 0 ? posts.map(post => <Post key={post.id} id={post.id} user={post.user} caption={post.caption} picture={post.picture} />) : ''}
+          </InfinitScrollComponenet>
+        )}
+
+
+
+
 
       </Container>
     </Layout>

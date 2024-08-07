@@ -16,7 +16,7 @@ const port = process.env.PORT || 3000;
 
 // using midlewares
 app.use(express.json());
-app.use(cors({ credentials: true, origin: '*' }));
+app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
 app.use(cookieParser());
 app.use(fileUpload({}));
 

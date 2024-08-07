@@ -15,24 +15,38 @@ const loginUserController = async (req, res) => {
     if (!emailValidation(email)) return res.status(400).json({ msg: 'information not valid' })
 
     try {
-        const user = await prisma.user.findUnique({ where: { email } });
+        const {password: user_password, ...user} = await prisma.user.findUnique({
+            where: { email },
+            select: {
+                id: true,
+                email: true,
+                first_name: true,
+                password:true,
+                last_name: true,
+                username: true,
+                followers: { select: { id: true, username: true } },
+                following: { select: { id: true, username: true } },
+                posts: { select: { caption: true, picture: true, createdAt: true, } },
+
+            }
+        });
         if (!user) return res.status(401).json({ msg: 'invalid email or password' });
-        const passCheck = await bcrypt.compare(password, user.password);
+        const passCheck = await bcrypt.compare(password, user_password);
         if (!passCheck) return res.status(401).json({ msg: 'invalid email or password' });
         const tokens = genTokens({ id: user.id });
         if (tokens === -1) return res.status(500).json({ msg: 'can not generate tokens' });
         // res.cookie('refresh-token', tokens.refreshToken, authConf.refresh);
         // res.cookie('access-token', tokens.accessToken, authConf.access);
         // return res.status(200).json({ msg: 'user is logged in' })
-        console.log(req.headers["x-platform"])
         if (req.headers['x-platform'] === "MOBILE") {
             return res.status(200).json({ accessToken: crypterToken(tokens.accessToken), refreshToken: crypterToken(tokens.refreshToken) })
         }
         res.cookie('refresh-token', tokens.refreshToken, authConf.refresh);
         res.cookie('access-token', tokens.accessToken, authConf.access);
-        return res.status(200).json({ msg: 'user is logged in' })
+        return res.status(200).json({ user })
     }
     catch (err) {
+        console.log(err)
         return res.status(500).json({ msg: err || 'unknown server error' })
     }
 }

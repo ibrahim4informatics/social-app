@@ -7,7 +7,7 @@ import ImageNameExtractor from "../helpers/functions/ImageNameExtractor.js";
 const getUserFollowingPosts = async (req, res) => {
     const { user_id } = req;
     const { caption, page } = req.query;
-    if (!page || Number.parseInt(page) === NaN) return res.status(400).json({msg:"missing parameters in url"});
+    if (!page || Number.parseInt(page) === NaN) return res.status(400).json({ msg: "missing parameters in url" });
     try {
         const user = await prisma.user.findUnique({ where: { id: user_id }, select: { following: { select: { id: true } } } });
         if (!user) return res.status(403).json({ msg: "can not perform this action" });
@@ -86,7 +86,7 @@ const createUserPost = async (req, res) => {
         return res.status(500).json({ msg: err || "unknown server error" });
     }
 };
-const getUserFollowingPostById = async (req, res) => {
+const getPostById = async (req, res) => {
     const { user_id } = req;
     const { id } = req.params;
     if (!uuidValidator(id)) return res.status(400).json({ msg: "invalid url parameter" });
@@ -95,9 +95,7 @@ const getUserFollowingPostById = async (req, res) => {
         if (!user) return res.status(403).json({ msg: "can not perform this action" });
         const post = await prisma.post.findUnique({
             where: {
-                id, user: {
-                    followers: { some: { id: user_id } }
-                }
+                id
             },
             select: {
                 id: true,
@@ -181,5 +179,5 @@ const deleteuserPostById = async (req, res) => {
     }
 }
 export {
-    getUserFollowingPosts, createUserPost, getUserFollowingPostById,updateUserPostById, deleteuserPostById
+    getUserFollowingPosts, createUserPost, getPostById, updateUserPostById, deleteuserPostById
 }

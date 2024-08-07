@@ -14,19 +14,7 @@ import CreatePost from "./pages/CreatePost";
 import EditPost from "./pages/EditPost";
 function App() {
 
-  const [user, setUser] = useState({
-    username: "ibdev",
-    first_name: "Ibrahim",
-    email:"khalil@mail.fr",
-    last_name: "Bneyahia",
-    followers: 25000,
-    following: 252500,
-    posts: [
-      { caption: "this is post", id: 1 },
-      { caption: "this is post2", id: 2 },
-      { caption: "this is post3", id: 3 },
-    ]
-  })
+  const [user, setUser] = useState(null)
 
   const routes = createBrowserRouter([
     { path: "/", element: <Home />, errorElement: <Error /> },

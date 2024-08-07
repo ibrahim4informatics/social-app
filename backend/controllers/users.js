@@ -82,16 +82,26 @@ const getSingleUserProfile = async (req, res) => {
     if (!uuidValidator(id)) return res.status(400).json({ msg: `invalid param` })
     if (id === user_id) return res.status(302).json({ msg: 'need to go to profile route' })
     try {
-        const { password, email, ...user } = await prisma.user.findUnique({
+        const { password, email, posts, ...user } = await prisma.user.findUnique({
             where: {
                 id
             },
-            include: { firends: true, friendof: true, posts: { include: { comments: { include: { user: { select: { id: true, first_name: true, last_name: true, username: true } } } } } } }
+            include: { followers: true, following: true, posts: { include: { comments: { include: { user: { select: { id: true, username: true } } } } } } }
         })
+        let i = 0;
+        while (i < user.followers.length && user_id !== user.followers[i].id) {
+            i++
+        }
+        if (i >= user.followers.length) {
+            return res.status(200).json({ user, followed: false });
+        }
+        else {
+            return res.status(200).json({ user: { ...user, posts }, followed: true })
+        }
 
-        return res.status(200).json({ user })
     }
     catch (err) {
+        console.log(err)
         return res.status(500).json({ msg: err || `uknown server error` });
     }
 }
