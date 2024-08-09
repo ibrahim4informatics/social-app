@@ -1,3 +1,7 @@
+import prisma from '../config/prisma.config.js';
+import uuidValidator from "../helpers/validation/uuidValidator.js";
+import sanitizer from 'sanitizer';
+const { sanitize } = sanitizer;
 const createComment = async (req, res) => {
     const { user_id } = req;
     const { post_id, content } = req.body;
@@ -5,7 +9,7 @@ const createComment = async (req, res) => {
     try {
         const user = await prisma.user.findUnique({ where: { id: user_id } });
         if (!user) return res.status(400).json({ msg: "can not perform this action" });
-        const post = await prisma.post.findUnique({ where: { id: post_id, user: { followers: { some: { id: user_id } } } } });
+        const post = await prisma.post.findUnique({ where: { id: post_id, user: { OR: [{ followers: { some: { id: user_id } } }, { id: user_id }] } } });
         if (!post) return res.status(404).json({ msg: "can not fin post" });
         const comment = await prisma.comment.create({ data: { content: sanitize(content) || null, user_id, post_id } });
         return res.status(201).json({ comment });
@@ -56,4 +60,4 @@ const deleteCommentById = async (req, res) => {
 
 
 
-export { createComment, updateCommentById,deleteCommentById }
+export { createComment, updateCommentById, deleteCommentById }

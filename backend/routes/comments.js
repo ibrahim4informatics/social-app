@@ -1,10 +1,6 @@
 import { Router } from "express";
-import prisma from '../config/prisma.config.js';
-import uuidValidator from "../helpers/validation/uuidValidator.js";
-import sanitizer from 'sanitizer';
 import { createComment, deleteCommentById, updateCommentById } from "../controllers/comments.js";
 
-const { sanitize } = sanitizer;
 /**
  * 
  * TODO: user can post comment on post | user can delete his own comment | user can update his comment 

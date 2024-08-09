@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { fetcher } from "../axios.conf";
 
 export function useFetch(url, deps) {
@@ -12,7 +12,7 @@ export function useFetch(url, deps) {
             setIsLoading(false);
         })
             .catch(err => { setError(err.response.data); setIsLoading(false) })
-    }, [isLoading].concat(deps))
+    }, [isLoading])
 
-    return { data, error, isLoading }
+    return { data, error, isLoading, setData }
 }

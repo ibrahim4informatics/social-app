@@ -114,7 +114,7 @@ const searchForUsers = async (req, res) => {
         if (!usernameValidation(username)) return res.status(400).json({ msg: `invalid data provided` });
 
         const users = await prisma.user.findMany({
-            where: { NOT: { id: user_id }, ...(username ? { username: { contains: `${username}` } } : {}) },
+            where: { NOT:{id:user_id}, ...(username ? { username: { contains: `${username}` } } : {}) },
             select: { username: true, id: true },
             orderBy: [{ username: 'asc' }, { createdAt: 'desc' }],
             take: 25,

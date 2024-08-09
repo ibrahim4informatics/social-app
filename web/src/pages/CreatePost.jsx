@@ -1,12 +1,15 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
 import { Container, Box, FormControl, FormLabel, Heading, Textarea, FormHelperText, Button, Text, FormErrorMessage } from '@chakra-ui/react'
 import { fetcher } from '../axios.conf';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 const CreatePost = () => {
   const [postData, setPostData] = useState({ file: '', caption: '' });
   const [error, setError] = useState({ caption: "", file: "" });
   const navigate = useNavigate();
+
+  const user = useAuth();
   const hundleInputChange = (e) => {
     if (e.target.value.length <= 500) {
       setPostData({ ...postData, caption: e.target.value })

@@ -5,12 +5,14 @@ import Post from '../components/Post';
 import InfinitScrollComponenet from 'react-infinite-scroll-component'
 import Loader from '../components/Loader';
 import { fetcher } from '../axios.conf';
+import { useAuth } from '../hooks/useAuth';
 
 const Home = () => {
   const [page, setPage] = useState(2);
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState(null);
   const [hasmore, setHasmore] = useState(true);
   const [payload, setPayload] = useState({});
+  const user = useAuth()
 
   useEffect(() => {
     fetcher.get(`/api/posts?page=1`).then(res => {
@@ -21,6 +23,10 @@ const Home = () => {
     })
       .catch(err => {
         console.log(err);
+        if(err.response.data.msg === "can not found informations"){
+          setPosts([]);
+          setHasmore(false);
+        }
         return;
       })
   }, [])
@@ -54,12 +60,12 @@ const Home = () => {
 
         {posts === null ? <Loader /> : (
           <InfinitScrollComponenet
-            dataLength={posts.length} hasMore={hasmore} loader={<Loader />} next={hundleNext} endMessage={<Badge w={'100%'} py={2} rounded={'md'} textAlign={'center'} colorScheme='purple'>End Of The Feed</Badge>}
+            dataLength={posts.length} hasMore={hasmore} loader={<Loader />} next={hundleNext} endMessage={posts.length > 0 ? <Badge w={'100%'} py={2} rounded={'md'} textAlign={'center'} colorScheme='purple'>End Of The Feed</Badge> :''}
           >
 
 
 
-            {posts.length > 0 ? posts.map(post => <Post key={post.id} id={post.id} user={post.user} caption={post.caption} picture={post.picture} />) : ''}
+            {posts.length > 0 ? posts.map(post => <Post key={post.id} id={post.id} user={post.user} caption={post.caption} picture={post.picture} />) : 'nothing😒'}
           </InfinitScrollComponenet>
         )}
 

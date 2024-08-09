@@ -68,7 +68,7 @@ router.patch("/unfollow/:id", isAuthenticated, unfollowUser);
  * ? -RESPONSE=  200:[OK] => {user:{}}
  * ?             | 500:[INTERNAL ERROR]=>{msg:err}
  */
-router.get('/search', searchForUsers)
+router.get('/search', isAuthenticated,searchForUsers)
 /************************************************************************************
  * !-url= http://localhost:5000/api/users/:id
  * !-Method= GET

@@ -8,6 +8,7 @@ import { AiOutlineEdit } from 'react-icons/ai';
 import formatFollowers from '../functions/formatFollowers';
 import { useFetch } from '../hooks/useFetch';
 import { fetcher } from '../axios.conf';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -16,9 +17,15 @@ const Profile = () => {
 
   const [user, setUser] = useContext(UserContext);
   const { data, error, isLoading } = useFetch("/api/users");
+  const navigate = useNavigate()
   useEffect(() => {
+    if (error && error.response.status === 401) {
+
+      return navigate('/login')
+
+    }
     if (!isLoading && data) setUser((data?.user));
-    
+
   }, [isLoading])
 
   return (

@@ -6,13 +6,43 @@ import Post from '../components/Post'
 import { useFetch } from '../hooks/useFetch'
 import { useParams } from 'react-router-dom'
 import Loader from '../components/Loader'
+import { fetcher } from '../axios.conf'
 const User = () => {
   const { id } = useParams();
-  const { data, isLoading, error } = useFetch(`/api/users/${id}`);
+  const { data, isLoading, setData } = useFetch(`/api/users/${id}`);
+
+  const hundleFollow = async () => {
+    try {
+      const res = await fetcher.patch(`/api/users/follow/${id}`);
+      if (res.status === 200) {
+
+        setData({ ...data, followed: true });
+
+      }
+    }
+    catch (err) {
+      console.log(err);
+      return
+    }
+  }
+  const hundleUnFollow = async () => {
+    try {
+      const res = await fetcher.patch(`/api/users/unfollow/${id}`);
+      if (res.status === 200) {
+        setData({ ...data, followed: false });
+
+      }
+    }
+    catch (err) {
+      console.log(err);
+      return
+    }
+  }
+
   return (
     <Layout>
 
-      {isLoading ? <Loader /> : (<Container h={"100vh"} display={'flex'} flexDir={'column'} my={0} py={0}>
+      {isLoading ? <Loader /> : (<Container h={"100vh"} display={'flex'} flexDir={'column'} my={2} overflowY={'auto'} py={0}>
         <Box my={4} display={'flex'} alignItems={'center'} justifyContent={'space-evenly'}>
 
 
@@ -34,8 +64,9 @@ const User = () => {
         </Box>
 
         <Box w={"100%"} display={'flex'} mt={4} alignItems={'center'} justifyContent={'center'}>
-         {data.followed ? <Button w={'80%'} colorScheme='gray'>Unfollow</Button> : <Button w={'80%'} colorScheme='purple'>Follow</Button>}
+          {data.followed ? <Button onClick={hundleUnFollow} w={'80%'} colorScheme='gray'>Unfollow</Button> : <Button w={'80%'} onClick={hundleFollow} colorScheme='purple'>Follow</Button>}
         </Box>
+
 
         <Box my={data.followed ? 2 : 'auto'}>
           {data.followed ? (
@@ -67,11 +98,6 @@ const User = () => {
                       <Input variant={'filled'} readOnly value={data.user.username} />
                     </FormControl>
 
-                    <FormControl my={2}>
-                      <FormLabel>Email:</FormLabel>
-                      <Input type='email' variant={'filled'} readOnly value={data.user.email} />
-                    </FormControl>
-
                   </TabPanel>
                 </TabPanels>
               </Tabs>
@@ -87,5 +113,6 @@ const User = () => {
     </Layout>
   )
 }
+
 
 export default User

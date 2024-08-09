@@ -159,24 +159,25 @@ const deleteuserPostById = async (req, res) => {
     const { user_id } = req;
     const { id } = req.params
     if (!uuidValidator(id)) return res.status(400).json({ msg: "invalid url parameter" });
-    try {
-        const user = await prisma.user.findUnique({ where: { id: user_id } });
-        if (!user) return res.status(403).json({ msg: "can not perform this action" });
-        const post = await prisma.post.findUnique({
-            where: {
-                id, user_id
-            }
-        });
-        if (!post) return res.status(404).json({ msg: `can not found post to delete` });
-        const isDone = await deleteImage(`${user_id}/${ImageNameExtractor(post.picture)}`);
-        if (!isDone) return res.status(400).json({ msg: 'error occured when deleting post' });
-        await prisma.post.delete({ where: { id } });
-        return res.status(200).json({ msg: `post ${post.caption} deleted success` });
-    }
-    catch (err) {
 
-        return res.status(500).json({ msg: err || "unknown server error" });
+    const user = await prisma.user.findUnique({ where: { id: user_id } });
+    if (!user) return res.status(403).json({ msg: "can not perform this action" });
+    const post = await prisma.post.findUnique({
+        where: {
+            id, user_id
+        }
+    });
+    if (!post) return res.status(404).json({ msg: `can not found post to delete` });
+    if (post.picture) {
+        await deleteImage(`${user_id}/${ImageNameExtractor(post.picture)}`);
     }
+    await prisma.post.delete({ where: { id } });
+    return res.status(200).json({ msg: `post ${post.caption} deleted success` });
+
+    // catch (err) {
+
+    //     return res.status(500).json({ msg: err || "unknown server error" });
+    // }
 }
 export {
     getUserFollowingPosts, createUserPost, getPostById, updateUserPostById, deleteuserPostById
